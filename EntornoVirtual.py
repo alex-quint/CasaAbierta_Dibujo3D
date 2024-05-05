@@ -17,7 +17,7 @@ hands = mp_hands.Hands()
 # Función para calcular el grosor de la línea en función de la distancia
 def calcular_grosor(distancia, max_grosor, max_distancia):
     # Ajustar el factor de escala para controlar la rapidez del cambio de grosor
-    factor_escala = 6 # Puedes ajustar este valor según sea necesario
+    factor_escala = 13
 
     # Calcular el grosor de manera exponencial en función de la distancia
     grosor = max_grosor * np.exp(-factor_escala * distancia / max_distancia)
@@ -28,7 +28,6 @@ def calcular_color(grosor, max_grosor):
     verde = int(255 * (grosor / max_grosor))
     # Crear el color verde con variación de intensidad
     return (0, verde, 0)
-
 
 # Bucle Principal
 while True:
@@ -53,40 +52,42 @@ while True:
             # Calcular el rectángulo delimitador solo para el dedo índice
             x = index_x - 10 
             y = index_y - 10 
-            w = 20  # Ancho del rectángulo
-            h = 20  # Altura del rectángulo
+            w = 40  # Ancho del rectángulo
+            h = 40  # Altura del rectángulo
 
             # Calcular la distancia del dedo a la cámara (coordenada z)
             distance = index_tip.z * width
 
-            max_thickness = 10
+            max_thickness_line = 7
+            max_thickness_color = (max_thickness_line*2)+1
 
             # Ajustar el grosor de la línea en función de la distancia
-            line_thickness = int(calcular_grosor(distance, 3, width))
+            line_thickness = int(calcular_grosor(distance, max_thickness_line, width))
 
             # Calcular el color verde en función del grosor
-            line_color = calcular_color(line_thickness, max_thickness)
+            line_color = calcular_color(line_thickness, max_thickness_color)
 
             # Dibujar el rectángulo en la imagen original
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
             # Dibujar una línea desde las coordenadas anteriores del dedo índice si hay coordenizadas anteriores
             if prev_index is not None:
+                # Establecer el patrón de puntos en función del grosor
                 cv2.line(canvas, prev_index, (index_x, index_y), line_color, line_thickness)
                  
             # Actualizar las coordenadas anteriores del dedo índice
             prev_index = (index_x, index_y)
 
-    # Suavizar el trazo antes de mostrarlo
-    if prev_index is not None:
-        trazo_x = [prev_index[0], index_x]
-        trazo_y = [prev_index[1], index_y]
-        trazo_x_smooth = cv2.GaussianBlur(np.array(trazo_x).astype(np.float32), (5, 5), 0)
-        trazo_y_smooth = cv2.GaussianBlur(np.array(trazo_y).astype(np.float32), (5, 5), 0)
-        for i in range(len(trazo_x_smooth) - 1):
-            pt1 = (int(trazo_x_smooth[i]), int(trazo_y_smooth[i]))
-            pt2 = (int(trazo_x_smooth[i + 1]), int(trazo_y_smooth[i + 1]))
-            cv2.line(canvas, pt1, pt2, line_color, line_thickness)
+            # Suavizar el trazo antes de mostrarlo
+            if prev_index is not None:
+                trazo_x = [prev_index[0], index_x]
+                trazo_y = [prev_index[1], index_y]
+                trazo_x_smooth = cv2.GaussianBlur(np.array(trazo_x).astype(np.float32), (5, 5), 0)
+                trazo_y_smooth = cv2.GaussianBlur(np.array(trazo_y).astype(np.float32), (5, 5), 0)
+                for i in range(len(trazo_x_smooth) - 1):
+                    pt1 = (int(trazo_x_smooth[i]), int(trazo_y_smooth[i]))
+                    pt2 = (int(trazo_x_smooth[i + 1]), int(trazo_y_smooth[i + 1]))
+                    cv2.line(canvas, pt1, pt2, line_color, line_thickness)
 
     cv2.imshow('Canvas', canvas)
     cv2.imshow('Camera', frame)
@@ -100,3 +101,4 @@ while True:
 
 cv2.destroyAllWindows()
 cap.release()
+
