@@ -17,7 +17,7 @@ hands = mp_hands.Hands()
 # Función para calcular el grosor de la línea en función de la distancia
 def calcular_grosor(distancia, max_grosor, max_distancia):
     # Ajustar el factor de escala para controlar la rapidez del cambio de grosor
-    factor_escala = 13
+    factor_escala = 11
 
     # Calcular el grosor de manera exponencial en función de la distancia
     grosor = max_grosor * np.exp(-factor_escala * distancia / max_distancia)
@@ -52,13 +52,13 @@ while True:
             # Calcular el rectángulo delimitador solo para el dedo índice
             x = index_x - 10 
             y = index_y - 10 
-            w = 40  # Ancho del rectángulo
-            h = 40  # Altura del rectángulo
+            w = 30  # Ancho del rectángulo
+            h = 30  # Altura del rectángulo
 
             # Calcular la distancia del dedo a la cámara (coordenada z)
             distance = index_tip.z * width
 
-            max_thickness_line = 7
+            max_thickness_line = 5
             max_thickness_color = (max_thickness_line*2)+1
 
             # Ajustar el grosor de la línea en función de la distancia
@@ -78,16 +78,16 @@ while True:
             # Actualizar las coordenadas anteriores del dedo índice
             prev_index = (index_x, index_y)
 
-            # Suavizar el trazo antes de mostrarlo
-            if prev_index is not None:
-                trazo_x = [prev_index[0], index_x]
-                trazo_y = [prev_index[1], index_y]
-                trazo_x_smooth = cv2.GaussianBlur(np.array(trazo_x).astype(np.float32), (5, 5), 0)
-                trazo_y_smooth = cv2.GaussianBlur(np.array(trazo_y).astype(np.float32), (5, 5), 0)
-                for i in range(len(trazo_x_smooth) - 1):
-                    pt1 = (int(trazo_x_smooth[i]), int(trazo_y_smooth[i]))
-                    pt2 = (int(trazo_x_smooth[i + 1]), int(trazo_y_smooth[i + 1]))
-                    cv2.line(canvas, pt1, pt2, line_color, line_thickness)
+        # Suavizar el trazo antes de mostrarlo
+        if prev_index is not None:
+            trazo_x = [prev_index[0], index_x]
+            trazo_y = [prev_index[1], index_y]
+            trazo_x_smooth = cv2.GaussianBlur(np.array(trazo_x).astype(np.float32), (5, 5), 0)
+            trazo_y_smooth = cv2.GaussianBlur(np.array(trazo_y).astype(np.float32), (5, 5), 0)
+            for i in range(len(trazo_x_smooth) - 1):
+                pt1 = (int(trazo_x_smooth[i]), int(trazo_y_smooth[i]))
+                pt2 = (int(trazo_x_smooth[i + 1]), int(trazo_y_smooth[i + 1]))
+                cv2.line(canvas, pt1, pt2, line_color, line_thickness)
 
     cv2.imshow('Canvas', canvas)
     cv2.imshow('Camera', frame)
