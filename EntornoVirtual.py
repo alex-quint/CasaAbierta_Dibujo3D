@@ -9,6 +9,7 @@ height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
 canvas = np.zeros((height, width, 3), dtype=np.uint8)
 prev_index = None
+finger_mode = 1  # Modo de detección de dedos (1: un dedo, 2: dos dedos)
 
 # Inicializar la detección de dedos con MediaPipe
 mp_hands = mp.solutions.hands
@@ -42,7 +43,7 @@ while True:
     results = hands.process(frame_rgb)
 
     if results.multi_hand_landmarks:
-        for hand_landmarks in results.multi_hand_landmarks:
+        for hand_idx, hand_landmarks in enumerate(results.multi_hand_landmarks[:finger_mode]):
             # Obtener la posición del dedo índice
             index_tip = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
 
@@ -94,11 +95,16 @@ while True:
 
     # Verificar si se presiona la tecla 'p' para limpiar el lienzo
     key = cv2.waitKey(1)
-    if key == ord('p'):
+    if key == ord('1'):
+        finger_mode = 1
+        prev_indices = {}
+    elif key == ord('2'):
+        finger_mode = 2
+        prev_indices = {}
+    elif key == ord('p'):
         canvas = np.zeros((height, width, 3), dtype=np.uint8)
-    elif key == 27:  # Salir si se presiona la tecla 'Esc'
+    elif key == 27:
         break
 
 cv2.destroyAllWindows()
 cap.release()
-
